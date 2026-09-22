@@ -2,7 +2,7 @@ name: Generate RSS Feed
 on:
   schedule:
     - cron: '0 * * * *'  # Runs hourly (UK time)
-  workflow_dispatch:  # Allows manual triggering
+  workflow_dispatch:
 
 jobs:
   generate:
@@ -13,11 +13,9 @@ jobs:
         with:
           python-version: '3.11'
       - name: Install dependencies
-        run: pip install feedparser pytz
+        run: pip install requests beautifulsoup4
       - name: Generate RSS feed
         run: python generate_feed.py
-        env:
-          TARGET_URL: "<<https://news.met.police.uk/tag/counter-terrorism-command>>"
       - name: Commit and push
         run: |
           git config --global user.name "GitHub Actions"
