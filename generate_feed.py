@@ -1,13 +1,29 @@
-import feedparser
-import os
+import requests
+from bs4 import BeautifulSoup
 from datetime import datetime
 import pytz
+import os
 
-# Fetch the target URL from environment variable
-url = os.getenv("TARGET_URL", "<<https://news.met.police.uk/tag/counter-terrorism-command>>")
+# Target URL
+url = "<<<https://news.met.police.uk/tag/counter-terrorism-command>>>"
 
-# Parse the page (adjust selectors as needed)
-feed = feedparser.parse(url)
+# Fetch the page
+response = requests.get(url)
+soup = BeautifulSoup(response.text, 'html.parser')
+
+# Extract items (adjust selectors as needed)
+items = []
+for article in soup.select('.article-list .article-item'):  # Update selector
+    title = article.select_one('.article-title').text.strip()
+    link = article.select_one('a')['href']
+    if not link.startswith('http'):
+        link = f"https://news.met.police.uk{link}"
+    items.append({
+        'title': title,
+        'link': link,
+        'description': 'Latest update from Met Police Counter-Terrorism Command.',
+        'pubDate': datetime.now(pytz.UTC).strftime('%a, %d %b %Y %H:%M:%S GMT')
+    })
 
 # Generate RSS feed
 rss_content = f"""<?xml version="1.0" encoding="UTF-8" ?>
@@ -18,13 +34,13 @@ rss_content = f"""<?xml version="1.0" encoding="UTF-8" ?>
   <description>Latest updates from the Met Police Counter-Terrorism Command.</description>
 """
 
-for entry in feed.entries:
+for item in items:
     rss_content += f"""
   <item>
-    <title>{entry.title}</title>
-    <link>{entry.link}</link>
-    <description>{entry.description}</description>
-    <pubDate>{datetime.now(pytz.UTC).strftime('%a, %d %b %Y %H:%M:%S GMT')}</pubDate>
+    <title>{item['title']}</title>
+    <link>{item['link']</link>
+    <description>{item['description']}</description>
+    <pubDate>{item['pubDate']}</pubDate>
   </item>
 """
 
