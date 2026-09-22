@@ -2,10 +2,9 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 import pytz
-import os
 
 # Target URL
-url = "<<<https://news.met.police.uk/tag/counter-terrorism-command>>>"
+url = "<<<<https://news.met.police.uk/tag/counter-terrorism-command>>>>"
 
 # Fetch the page
 response = requests.get(url)
@@ -13,9 +12,9 @@ soup = BeautifulSoup(response.text, 'html.parser')
 
 # Extract items (adjust selectors as needed)
 items = []
-for article in soup.select('.article-list .article-item'):  # Update selector
-    title = article.select_one('.article-title').text.strip()
-    link = article.select_one('a')['href']
+for article in soup.select('article'):  # Update selector to match Met Police page
+    title = article.select_one('h3').text.strip() if article.select_one('h3') else "No title"
+    link = article.select_one('a')['href'] if article.select_one('a') else url
     if not link.startswith('http'):
         link = f"https://news.met.police.uk{link}"
     items.append({
@@ -38,7 +37,7 @@ for item in items:
     rss_content += f"""
   <item>
     <title>{item['title']}</title>
-    <link>{item['link']</link>
+    <link>{item['link']}</link>
     <description>{item['description']}</description>
     <pubDate>{item['pubDate']}</pubDate>
   </item>
